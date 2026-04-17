@@ -1,6 +1,6 @@
 apiVersion: v2
 name: k8s-app
-description: NodeCity Express API - Helm edition
+description: Simple ArgoCD practice app
 type: application
-version: 0.2.0
+version: 0.1.0
 appVersion: "1.0.0"

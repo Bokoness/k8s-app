@@ -1,25 +1,11 @@
-# templates/service.yaml
-# A Service gives the Deployment a stable network endpoint.
-# Without it, pods are only reachable by their ephemeral internal IP,
-# which changes every time a pod restarts.
-
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}
 spec:
-  # ClusterIP = internal cluster traffic only
-  # Ingress will handle external traffic (added later)
-  type: {{ .Values.service.type }}
-
-  # Routes traffic to pods whose labels match this selector
-  # Must match the labels on pods in deployment.yaml
   selector:
     app: {{ .Release.Name }}
-
   ports:
-    - protocol: TCP
-      # Port the Service exposes to the rest of the cluster
-      port: {{ .Values.service.port }}
-      # Port on the pod to forward to - must be an integer, not a string
-      targetPort: 3000
+    - port: {{ .Values.service.port }}
+      targetPort: 80
+  type: {{ .Values.service.type }}
