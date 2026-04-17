@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Bokoness/k8s-app
+    targetRevision: master
+    path: argocd-apps        # points to the folder of Application manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd        # child apps land in argocd namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
