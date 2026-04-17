@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: k8s-app
+  namespace: prod
+  annotations:
+    # Tells the nginx controller to handle this ingress
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx  # Which controller processes this Ingress
+  rules:
+    - host: k8s-app.local        # The fake domain we'll use locally
+      http:
+        paths:
+          - path: /               # Match all paths under this host
+            pathType: Prefix      # Prefix = match /anything starting with /
+            backend:
+              service:
+                name: k8s-service  # Forward to this Service
+                port:
+                  number: 80            # The port the Service exposes

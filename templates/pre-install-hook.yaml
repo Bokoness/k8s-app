@@ -1,0 +1,43 @@
+# templates/pre-install-hook.yaml
+# A Helm hook that runs BEFORE any other resources are created.
+# If this Job fails, Helm aborts the install/upgrade entirely.
+# Useful for checking dependencies are ready before deploying the app.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-db-check
+  annotations:
+    # helm.sh/hook: when to run this resource.
+    # pre-install = before any resources are created on first install.
+    # pre-upgrade = before any resources are updated on upgrade.
+    "helm.sh/hook": pre-install,pre-upgrade
+    # helm.sh/hook-weight: order when multiple hooks run at the same stage.
+    # Lower numbers run first. Default is 0.
+    "helm.sh/hook-weight": "0"
+    # helm.sh/hook-delete-policy: when to delete the Job after it runs.
+    # hook-succeeded = delete only on success (failed jobs stay for debugging).
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  # backoffLimit: how many times to retry before marking the Job as failed.
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-check
+          image: postgres:15
+          imagePullPolicy: IfNotPresent
+          # Use pg_isready to check if PostgreSQL is accepting connections.
+          # pg_isready exits 0 on success, non-zero on failure.
+          # Helm checks the Job exit code - non-zero aborts the release.
+          command:
+            - sh
+            - -c
+            - |
+              echo "Checking PostgreSQL at {{ .Release.Name }}-postgres:5432..."
+              until pg_isready -h {{ .Release.Name }}-postgres -p 5432 -U {{ .Values.postgres.username }}; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"

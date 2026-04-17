@@ -1,0 +1,34 @@
+# templates/tests/test-connection.yaml
+# A Helm test - only runs when you call: helm test <release>
+# Use it to validate the release is healthy after install or upgrade.
+# Tests are Jobs with the helm.sh/hook: test annotation.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-test-connection
+  annotations:
+    # helm.sh/hook: test means this ONLY runs via helm test command.
+    # It never runs during install or upgrade automatically.
+    "helm.sh/hook": test
+    # Delete the test Job after it completes (pass or fail).
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: test-connection
+          image: postgres:15
+          imagePullPolicy: IfNotPresent
+          # Test 1: check PostgreSQL is reachable
+          # Test 2: check the nodecity database exists
+          command:
+            - sh
+            - -c
+            - |
+              echo "Test 1: checking PostgreSQL connectivity..."
+              pg_isready -h {{ .Release.Name }}-postgres -p 5432 -U {{ .Values.postgres.username }}
+              echo "Test 2: checking nodecity database exists..."
+              PGPASSWORD={{ .Values.postgres.password }} psql                 -h {{ .Release.Name }}-postgres                 -U {{ .Values.postgres.username }}                 -d {{ .Values.postgres.database }}                 -c "SELECT 1"
+              echo "All tests passed!"

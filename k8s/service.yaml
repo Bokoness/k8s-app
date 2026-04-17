@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-service
+  namespace: prod
+spec:
+  # Which pods to route traffic to — must match pod labels
+  selector:
+    app: k8s-app
+  ports:
+    - protocol: TCP
+      port: 80         # Port the Service listens on (inside cluster)
+      targetPort: 3000 # Port your app actually runs on inside the pod
+  type: ClusterIP 

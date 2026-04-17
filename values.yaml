@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  repository: k8s-app
+  tag: v1
+  pullPolicy: Never
+
+config:
+  port: "3000"
+  nodeEnv: "production"
+  dbPort: "5432"
+  dbName: "nodecity"
+  dbUser: "nodecity"
+
+service:
+  type: ClusterIP
+  port: 80
+
+postgres:
+  image: postgres:15
+  database: nodecity
+  username: nodecity
+  password: nodecity123
+  storage: 1Gi
+
+# Ingress is disabled by default.
+# Set ingress.enabled=true at install time to expose the app externally.
+# Example: helm upgrade k8s-app . --set ingress.enabled=true --set ingress.host=nodecity.local
+ingress:
+  enabled: false
+  host: nodecity.local
+  # annotations let you configure the ingress controller behaviour
+  annotations: {}
+
+# Extra environment variables to inject into the app container.
+# Useful for feature flags or any config not covered by the chart.
+# Example:
+#   extraEnv:
+#     - name: FEATURE_X
+#       value: "true"
+extraEnv: []

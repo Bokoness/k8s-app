@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8s-app-config  # Pods reference this ConfigMap by this name
+  namespace: prod
+data:
+  # Pods can consume these as environment variables
+  # (via configMapKeyRef) or as mounted files.
+  VERSION: "3.0"
+  ENV_NAME: "local-minikube"

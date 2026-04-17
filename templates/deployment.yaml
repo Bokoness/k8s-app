@@ -1,0 +1,39 @@
+# templates/deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "k8s-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "k8s-app.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-app.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: nodecity
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+            - secretRef:
+                name: {{ .Release.Name }}-secret
+          {{- if .Values.extraEnv }}
+          # range loops over the extraEnv list from values.yaml.
+          # Each item is a standard K8s env var object with name and value.
+          # This lets users inject extra env vars without modifying the chart.
+          env:
+            {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          {{- end }}
